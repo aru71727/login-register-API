@@ -1,15 +1,16 @@
 const express = require('express');
 const app = express();
-const signup = require('./signup.js');
-const login = require('./login.js');
-const deleteUser = require('./deleteUser.js');
-const showUsers = require('./showUsers.js');
-const updateProfile = require('./updateProfile.js');
-const changePassword = require('./changePassword.js');
+const signup = require('./services/signup.js');
+const login = require('./services/login.js');
+const deleteUser = require('./services/deleteUser.js');
+const showUsers = require('./services/showUsers.js');
+const updateProfile = require('./services/updateProfile.js');
+const changePassword = require('./services/changePassword.js');
+const logout = require('./services/logout.js');
 const session = require('express-session');
 var cookieParser = require("cookie-parser");
-const { checkToken } = require("./jwt_validation");
-const con = require('./db_connection.js');
+const { checkToken } = require("./auth/jwt_validation");
+const con = require('./auth/db_connection.js');
 
 
 app.set('view engine','ejs');
@@ -40,6 +41,7 @@ app.use(cookieParser());
         if (req.session.user && req.cookies.user_sid) {
          // res.redirect("/dashboard");
          //console.log(req.cookies.jwt);
+         
          const sql = "Select * from users where id = " + "'" + req.session.user.id+ "';"
          var result = await(con.fetch(sql));
             console.log(req.session.user.id , req.cookies.user_sid)
@@ -48,22 +50,11 @@ app.use(cookieParser());
                 msg: result
                 
             });
-          
-          
 
         } else {
           next();
         }
       };
-      
-
-    app.use('/signup', signup);
-    app.use('/login', login);
-    app.use('/deleteUser',deleteUser);
-    app.use('/showUsers',showUsers);
-    app.use('/updateProfile', updateProfile);
-    app.use('/changePassword', changePassword);
-
     
 app.get("/",sessionChecker,(req, res) => {
     console.log(req.session.user,'index_page');
@@ -74,41 +65,16 @@ app.get("/",sessionChecker,(req, res) => {
    // res.send("Home page")
   });
 
-    app.get("/dashboard",sessionChecker,checkToken, (req, res) => {
-        console.log(req.session.user,'dashboard_page');
-        console.log(token)
-        if (req.session.user && req.cookies.user_sid) {
-            res.json({
-                message: "Welcome to Dashboard...!!"
-              });
-            //res.render('home');
-        } else {
-            
-          //res.redirect("/login");
-        }
-      });
-    
-  
+  app.use('/signup', signup);
+  app.use('/login', login);
+  app.use('/deleteUser',checkToken,deleteUser);
+  app.use('/showUsers',checkToken,showUsers);
+  app.use('/updateProfile',checkToken,updateProfile);
+  app.use('/changePassword',checkToken,changePassword);
+  app.use('/logout',checkToken,logout);
 
 
-
-  app.get("/logout", (req, res) => {
-// console.log(req.session.user,req.cookies.user_sid,'logout_page');
-
-    if (req.session.user && req.cookies.user_sid) {
-      res.clearCookie("user_sid");
-      //res.redirect("/");
-      res.json({
-        message: "Logged out...!!"
-      });
-    } else {
-     // res.redirect("/login");
-     res.json({
-        message: "Error...!!"
-      });
-    }
-  });
   
 console.log('-------',process.env.JWT_KEY)
   
-app.listen('8080');
+app.listen('8000');

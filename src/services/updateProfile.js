@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const con = require('./db_connection.js');
+const con = require('../auth/db_connection.js');
 const bodyParser = require('body-parser');
 const async = require('async'); 
 router.use(bodyParser.urlencoded({ extended: true })); 
 var cookieParser = require("cookie-parser");
 router.use(cookieParser());
-const { checkToken } = require("./jwt_validation");
 
-router.post('/',checkToken, async function(req,res){
+router.post('/', async function(req,res){
     console.log("Inside Update profile..")
     id = req.decoded.user.id;
     const sql = "Update users set username = '" + req.body.username + "',address = '" + req.body.address + "' where id ="+ id +";"

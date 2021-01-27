@@ -1,21 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const con = require('./db_connection.js');
-const bodyParser = require('body-parser');
+const con = require('../auth//db_connection.js');
 const async = require('async'); 
-router.use(bodyParser.urlencoded({ extended: true })); 
 var cookieParser = require("cookie-parser");
 router.use(cookieParser());
-const { checkToken } = require("./jwt_validation");
 
-router.post('/', checkToken, async function(req,res){
+router.post('/', async function(req,res){
     
-   
-    const sql = "select id, username, email, address from users;"
+    username = req.body.email;
+    const sql = "Delete from users where id ="+ id +";"
     try{
     var result = await(con.fetch(sql));
         res.json({
-            msg: result 
+            msg: "User Deleted Successfully " 
         })
     }catch (error) {
         res.json({

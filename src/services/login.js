@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const con = require('./db_connection.js');
+const con = require('../auth/db_connection.js');
 const bodyParser = require('body-parser');
 const async = require('async'); 
+const jwt = require('jsonwebtoken');
 router.use(bodyParser.urlencoded({ extended: true })); 
-const jwt = require("jsonwebtoken");
 var crypto = require('crypto'); 
 
 
@@ -51,8 +51,8 @@ router.post('/',async function(req,res){
     }
     else{
         const user =  result[0];
-        console.log('Hashed Password: ',hash);
-       // console.log(user)
+       // console.log('Hashed Password: ',hash);
+       
 
         jwt.sign({user}, 'secretkey', { expiresIn: '30000000s' }, (err, token) => {
             res.json({
